@@ -4,6 +4,19 @@ A production-style microservices pipeline that simulates a satellite ground stat
 
 ---
 
+## ⚠️ IMPORTANT: Run `install.sh` Before Testing
+
+This project requires systemd services and `/etc/hosts` configuration. **You MUST run the install script before testing any endpoints.**
+
+```bash
+# After cloning, run this FIRST:
+sudo bash install.sh
+```
+
+**Skipping this step will cause `NameResolutionError` when services try to communicate.**
+
+---
+
 ## 📋 Table of Contents
 
 - [Architecture Overview](#architecture-overview)
@@ -54,6 +67,20 @@ Service A: Ground Station API (Port 3001) — Callback
 git clone https://github.com/yordanoshagos/devops-satellite-telemetry.git
 cd devops-satellite-telemetry
 ```
+
+### 1.5 Add Service Discovery Hostnames (Required for Local Development)
+
+Services communicate using hostnames, not hardcoded IPs. Add these to `/etc/hosts`:
+
+```bash
+sudo tee -a /etc/hosts << 'EOF'
+127.0.0.1 telemetry-parser
+127.0.0.1 anomaly-detector
+127.0.0.1 ground-station-api
+EOF
+```
+
+**Why this matters:** When Service A calls `http://telemetry-parser:3002/parse`, your system needs to know that `telemetry-parser` means `localhost` (127.0.0.1). In production, `install.sh` handles this automatically. For local development, you must add it manually.
 
 ### 2. Run Service A (Ground Station API)
 
@@ -199,7 +226,10 @@ This will:
 - Configure Nginx reverse proxy
 - Set up firewall rules (port 80 public, 3002/3003 blocked)
 - Register and start systemd services
-- Add service discovery hostnames
+- Add service discovery hostnames to `/etc/hosts`
+- **Add hostnames to cloud-init template** (if cloud-init is installed) for reboot persistence
+
+> **Note on Reboot Persistence:** On cloud VMs with `cloud-init`, `/etc/hosts` is overwritten on every boot. The `install.sh` script detects this and also adds entries to `/etc/cloud/templates/hosts.debian.tmpl` so your service discovery survives reboots.
 
 ### 3. Verify Deployment
 
@@ -350,6 +380,7 @@ curl -X POST http://localhost/telemetry \
 | Service A won't start | Service B or C not ready | Start B and C first: `sudo systemctl start telemetry-parser anomaly-detector` |
 | Can't reach port 3002 from outside | Firewall blocking | Correct — internal services should NOT be accessible externally |
 | `Connection refused` on port 80 | Nginx not running | `sudo systemctl restart nginx` |
+| `NameResolutionError` for `telemetry-parser` | `/etc/hosts` missing service hostnames | Add `127.0.0.1 telemetry-parser` to `/etc/hosts` |
 | Logs show `processing_request_id` not found | Request ID mismatch | Check that all services use the same ID field name |
 
 ### Check Service Status
