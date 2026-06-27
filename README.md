@@ -302,6 +302,24 @@ sudo systemctl disable telemetry-parser
 
 A containerized alternative to the VM/systemd deployment. No `install.sh`, `/etc/hosts`, or firewall configuration is required.
 
+### Docker Compose Command
+
+Use the appropriate command for your Docker installation:
+
+- **Docker Compose v2** (built into Docker CLI): `docker compose`
+- **Docker Compose v1** (standalone Python package): `docker-compose`
+
+In the examples below, replace `<compose>` with the appropriate command for your system.
+
+Example:
+
+```bash
+<compose> up --build -d
+<compose> ps
+<compose> logs ground-station-api
+<compose> restart ground-station-api
+```
+
 ### Prerequisites
 - Docker Engine 20.10+
 - Docker Compose 2.0+
@@ -309,10 +327,10 @@ A containerized alternative to the VM/systemd deployment. No `install.sh`, `/etc
 ### Start the System
 ```bash
 # Build and start all services
-docker compose up --build -d
+<compose> up --build -d
 
 # Verify all containers are running
-docker compose ps
+<compose> ps
 ```
 
 ### Test the Public Route
@@ -351,30 +369,30 @@ curl -i --connect-timeout 3 http://localhost:3003/health
 ### View Logs
 ```bash
 # All services
-docker compose logs
+<compose> logs
 
 # Specific service
-docker compose logs ground-station-api
-docker compose logs telemetry-parser
-docker compose logs anomaly-detector
-docker compose logs nginx
+<compose> logs ground-station-api
+<compose> logs telemetry-parser
+<compose> logs anomaly-detector
+<compose> logs nginx
 ```
 
 ### Stop and Restart a Service
 ```bash
 # Stop Telemetry Parser
-docker compose stop telemetry-parser
+<compose> stop telemetry-parser
 
 # Start it again
-docker compose start telemetry-parser
+<compose> start telemetry-parser
 
 # Restart Ground Station API
-docker compose restart ground-station-api
+<compose> restart ground-station-api
 ```
 
 ### Shut Everything Down
 ```bash
-docker compose down
+<compose> down
 ```
 
 ### Trace a Request
@@ -399,13 +417,13 @@ curl -X POST http://localhost/telemetry \
   }'
 
 # Trace it through logs
-docker compose logs | grep demo-container-001
+<compose> logs | grep demo-container-001
 ```
 
 ### Failure and Recovery Test
 ```bash
 # Stop Telemetry Parser
-docker compose stop telemetry-parser
+<compose> stop telemetry-parser
 
 # Send request (should fail gracefully)
 curl -X POST http://localhost/telemetry \
@@ -427,10 +445,10 @@ curl -X POST http://localhost/telemetry \
   }'
 
 # Check logs
-docker compose logs ground-station-api
+<compose> logs ground-station-api
 
 # Recover
-docker compose start telemetry-parser
+<compose> start telemetry-parser
 
 # Verify recovery
 curl -i http://localhost/health
