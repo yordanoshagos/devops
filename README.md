@@ -25,6 +25,8 @@ sudo bash install.sh
 - [Quick Start (Run Locally)](#quick-start-run-locally)
 - [Full Deployment (Production)](#full-deployment-production)
 - [Running with Docker Compose](#-running-with-docker-compose)
+- [CI/CD Pipeline](#-cicd-pipeline)
+- [Container CI/CD Deployment](#container-cicd-deployment)
 - [API Reference](#api-reference)
 - [Testing](#testing)
 - [Troubleshooting](#troubleshooting)
@@ -296,8 +298,6 @@ sudo systemctl disable telemetry-parser
 
 ---
 
-## API Reference
-
 ## 🐳 Running with Docker Compose
 
 A containerized alternative to the VM/systemd deployment. No `install.sh`, `/etc/hosts`, or firewall configuration is required.
@@ -452,6 +452,71 @@ curl -X POST http://localhost/telemetry \
 
 # Verify recovery
 curl -i http://localhost/health
+```
+
+---
+
+## 🚀 CI/CD Pipeline
+
+GitHub Actions builds, tests, verifies, and publishes container images. Defined in [`.github/workflows/container-ci-cd.yml`](.github/workflows/container-ci-cd.yml).
+
+### What runs on every pull request and push to `main`
+
+**`verify`** (matrix over service-a/b/c) — installs each service's dependencies, runs its `pytest` suite, does a build/syntax check, then builds that service's Docker image locally. A failing test or failing build blocks the rest of the pipeline (and should block merge).
+
+**`verify-compose`** (needs `verify`) — validates `docker compose config`, builds the full stack with `docker compose build --pull`, starts it, and checks:
+- the gateway health route responds
+- `POST /telemetry` is accepted end-to-end through the full A → B → C → A pipeline
+- Service B and C are **not** reachable on the host (only Nginx is published)
+
+> **Deviation from the assignment's example route:** the reference workflow checks `http://localhost:8080/service-a/health`. This project's actual Nginx gateway (`nginx/nginx-docker.conf`) publishes host port **80** and proxies `/` directly to Service A's own `/health` route, so CI checks `http://localhost/health` instead. Functionally equivalent — same gateway-fronted health check, just this project's existing route/port convention from the containerization lab.
+
+### What runs only on push to `main`
+
+**`publish`** (needs `verify-compose`, matrix over service-a/b/c) — logs into Docker Hub and pushes each service image tagged **`sha-<7-char-commit-sha>`** only (never `latest`), as `<DOCKERHUB_USERNAME>/<repo-name>-service-a` (and `-service-b`, `-service-c`), with `org.opencontainers.image.revision` and `.source` labels for traceability back to the exact commit.
+
+### Required repository configuration
+
+Under **Settings → Secrets and variables → Actions**:
+
+| Type | Name | Value |
+|------|------|-------|
+| Variable | `DOCKERHUB_USERNAME` | Your Docker Hub username/namespace |
+| Secret | `DOCKERHUB_TOKEN` | A Docker Hub [access token](https://hub.docker.com/settings/security) (not your password) |
+
+## Container CI/CD Deployment
+
+### Latest deployed version
+
+Commit:
+`<full-commit-hash>`
+
+Image tag:
+`sha-<short-commit-hash>`
+
+Images:
+- `<dockerhub-username>/devops-satellite-telemetry-service-a:sha-<short-commit-hash>`
+- `<dockerhub-username>/devops-satellite-telemetry-service-b:sha-<short-commit-hash>`
+- `<dockerhub-username>/devops-satellite-telemetry-service-c:sha-<short-commit-hash>`
+
+*(Fill in the commit hash and tag after the first successful `publish` run on `main`.)*
+
+### Deploy
+
+```bash
+cp .env.example .env
+export DOCKERHUB_USERNAME=<dockerhub-username>
+export APP_NAME=devops-satellite-telemetry
+./scripts/deploy.sh sha-<short-commit-hash>
+```
+
+`docker-compose.prod.yml` pulls the published images (it never builds locally) and keeps Service B/C on an `internal: true` backend network — only Nginx is reachable from the host.
+
+### Verify
+
+```bash
+docker compose -f docker-compose.prod.yml ps
+curl http://localhost/health
 ```
 
 ---
@@ -693,22 +758,39 @@ sudo systemctl start ground-station-api
 devops-satellite-telemetry/
 ├── README.md                          # This file
 ├── install.sh                         # One-command VM deployment script
-├── docker-compose.yml                 # Docker Compose orchestration
+├── docker-compose.yml                 # Docker Compose orchestration (local build)
+├── docker-compose.prod.yml            # Docker Compose using published Docker Hub images
+├── .env.example                       # Template for DOCKERHUB_USERNAME/APP_NAME/IMAGE_TAG
 ├── .dockerignore                      # Files to exclude from Docker build context
+│
+├── .github/workflows/
+│   └── container-ci-cd.yml            # Build, verify, and publish images on push/PR
 │
 ├── service-a/                         # Ground Station API (Port 3001)
 │   ├── app.py
 │   ├── requirements.txt
+│   ├── requirements-dev.txt           # + pytest, for CI test step only (not baked into image)
+│   ├── pytest.ini
+│   ├── tests/test_app.py
+│   ├── .dockerignore
 │   └── Dockerfile                     # Container image for Service A
 │
 ├── service-b/                         # Telemetry Parser (Port 3002)
 │   ├── app.py
 │   ├── requirements.txt
+│   ├── requirements-dev.txt
+│   ├── pytest.ini
+│   ├── tests/test_app.py
+│   ├── .dockerignore
 │   └── Dockerfile                     # Container image for Service B
 │
 ├── service-c/                         # Anomaly Detector (Port 3003)
 │   ├── app.py
 │   ├── requirements.txt
+│   ├── requirements-dev.txt
+│   ├── pytest.ini
+│   ├── tests/test_app.py
+│   ├── .dockerignore
 │   └── Dockerfile                     # Container image for Service C
 │
 ├── nginx/
@@ -724,7 +806,8 @@ devops-satellite-telemetry/
 │   ├── test-end-to-end.sh
 │   ├── trace-request.sh
 │   ├── generate-telemetry.sh
-│   └── configure-firewall.sh
+│   ├── configure-firewall.sh
+│   └── deploy.sh                      # Manual deploy: ./scripts/deploy.sh sha-<hash>
 │
 └── docs/                              # Documentation and validation
     └── CONTAINER_VALIDATION.md        # Docker Compose validation evidence
