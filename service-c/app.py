@@ -34,6 +34,7 @@ THRESHOLDS = {
 }
 
 app = Flask(__name__)
+app.start_time = time.time()
 
 
 class JSONLogFormatter(logging.Formatter):
@@ -407,7 +408,6 @@ def internal_error(error):
 
 
 if __name__ == "__main__":
-    app.start_time = time.time()
     log_event(
         event="service_startup",
         outcome="success",
