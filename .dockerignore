@@ -19,3 +19,8 @@ htmlcov/
 pip-log.txt
 pip-delete-this-directory.txt
 .DS_Store
+tests/
+requirements-dev.txt
+pytest.ini
+.env.*
+*.log

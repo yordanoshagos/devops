@@ -1,8 +1,6 @@
-version: "3.8"
-
 services:
   nginx:
-    image: nginx:alpine
+    image: nginx:1.27-alpine
     container_name: nginx
     ports:
       - "80:80"
@@ -48,3 +46,6 @@ services:
 networks:
   satellite-net:
     driver: bridge
+
+
+
