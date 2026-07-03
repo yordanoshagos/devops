@@ -489,14 +489,15 @@ Under **Settings → Secrets and variables → Actions**:
 ### Latest deployed version
 
 Commit:
-`6183ded`
+`3caff4f`
+
+Image tag:
+`sha-3caff4f`
 
 Images:
-- `<dockerhub-username>/devops-satellite-telemetry-service-a:sha-<short-commit-hash>`
-- `<dockerhub-username>/devops-satellite-telemetry-service-b:sha-<short-commit-hash>`
-- `<dockerhub-username>/devops-satellite-telemetry-service-c:sha-<short-commit-hash>`
-
-*(Fill in the commit hash and tag after the first successful `publish` run on `main`.)*
+- `arsemageb/devops-satellite-telemetry-service-a:sha-3caff4f`
+- `arsemageb/devops-satellite-telemetry-service-b:sha-3caff4f`
+- `arsemageb/devops-satellite-telemetry-service-c:sha-3caff4f`
 
 ### Deploy
 
