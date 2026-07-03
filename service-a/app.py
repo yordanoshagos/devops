@@ -26,6 +26,7 @@ TELEMETRY_PARSER_URL = os.environ.get("TELEMETRY_PARSER_URL", "http://telemetry-
 ANOMALY_DETECTOR_URL = os.environ.get("ANOMALY_DETECTOR_URL", "http://anomaly-detector:3003/analyze")
 
 app = Flask(__name__)
+app.start_time = time.time()
 
 # In-memory store for tracking requests (in production, use Redis)
 request_store = {}
@@ -412,7 +413,6 @@ def internal_error(error):
 
 
 if __name__ == "__main__":
-    app.start_time = time.time()
     log_event(
         event="service_startup",
         outcome="success",
