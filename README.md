@@ -489,10 +489,7 @@ Under **Settings → Secrets and variables → Actions**:
 ### Latest deployed version
 
 Commit:
-`<full-commit-hash>`
-
-Image tag:
-`sha-<short-commit-hash>`
+`6183ded`
 
 Images:
 - `<dockerhub-username>/devops-satellite-telemetry-service-a:sha-<short-commit-hash>`
