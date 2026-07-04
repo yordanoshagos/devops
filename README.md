@@ -1,5 +1,7 @@
 # 🛰️ Satellite Telemetry Processing Pipeline
 
+[![Container CI/CD](https://github.com/yordanoshagos/devops-satellite-telemetry/actions/workflows/container-ci-cd.yml/badge.svg)](https://github.com/yordanoshagos/devops-satellite-telemetry/actions/workflows/container-ci-cd.yml)
+
 A production-style microservices pipeline that simulates a satellite ground station receiving, parsing, and analyzing telemetry data. Built with Flask, Nginx, and systemd for a DevOps/Systems Engineering assignment.
 
 ---

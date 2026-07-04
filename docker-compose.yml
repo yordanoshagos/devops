@@ -9,7 +9,7 @@ services:
     depends_on:
       - ground-station-api
     networks:
-      - satellite-net
+      - frontend
     restart: unless-stopped
 
   ground-station-api:
@@ -19,8 +19,12 @@ services:
     environment:
       - TELEMETRY_PARSER_URL=http://telemetry-parser:3002/parse
       - ANOMALY_DETECTOR_URL=http://anomaly-detector:3003/analyze
+    depends_on:
+      - telemetry-parser
+      - anomaly-detector
     networks:
-      - satellite-net
+      - frontend
+      - backend
     restart: unless-stopped
 
   telemetry-parser:
@@ -30,7 +34,7 @@ services:
     environment:
       - ANOMALY_DETECTOR_URL=http://anomaly-detector:3003/analyze
     networks:
-      - satellite-net
+      - backend
     restart: unless-stopped
 
   anomaly-detector:
@@ -40,12 +44,13 @@ services:
     environment:
       - GROUND_STATION_CALLBACK_URL=http://ground-station-api:3001/callback
     networks:
-      - satellite-net
+      - backend
     restart: unless-stopped
 
 networks:
-  satellite-net:
-    driver: bridge
+  frontend:
+  backend:
+    internal: true
 
 
 
