@@ -1,5 +1,7 @@
 # 🛰️ Satellite Telemetry Processing Pipeline
 
+[![Container CI/CD](https://github.com/yordanoshagos/devops-satellite-telemetry/actions/workflows/container-ci-cd.yml/badge.svg)](https://github.com/yordanoshagos/devops-satellite-telemetry/actions/workflows/container-ci-cd.yml)
+
 A production-style microservices pipeline that simulates a satellite ground station receiving, parsing, and analyzing telemetry data. Built with Flask, Nginx, and systemd for a DevOps/Systems Engineering assignment.
 
 ---
@@ -489,17 +491,15 @@ Under **Settings → Secrets and variables → Actions**:
 ### Latest deployed version
 
 Commit:
-`<full-commit-hash>`
+`3caff4f`
 
 Image tag:
-`sha-<short-commit-hash>`
+`sha-3caff4f`
 
 Images:
-- `<dockerhub-username>/devops-satellite-telemetry-service-a:sha-<short-commit-hash>`
-- `<dockerhub-username>/devops-satellite-telemetry-service-b:sha-<short-commit-hash>`
-- `<dockerhub-username>/devops-satellite-telemetry-service-c:sha-<short-commit-hash>`
-
-*(Fill in the commit hash and tag after the first successful `publish` run on `main`.)*
+- `arsemageb/devops-satellite-telemetry-service-a:sha-3caff4f`
+- `arsemageb/devops-satellite-telemetry-service-b:sha-3caff4f`
+- `arsemageb/devops-satellite-telemetry-service-c:sha-3caff4f`
 
 ### Deploy
 

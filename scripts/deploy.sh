@@ -21,6 +21,12 @@ if [ -z "$IMAGE_TAG" ]; then
     exit 1
 fi
 
+if [ "$IMAGE_TAG" = "latest" ]; then
+    echo "Refusing to deploy tag 'latest' - deployments must be pinned to a commit."
+    echo "Usage: ./scripts/deploy.sh sha-<short-commit-hash>"
+    exit 1
+fi
+
 export IMAGE_TAG
 export APP_NAME="${APP_NAME:-$(basename "$PWD")}"
 
