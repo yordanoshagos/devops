@@ -71,8 +71,10 @@ jobs:
       - name: Build Compose stack
         run: docker compose build --pull
 
-      - name: Start Compose stack
-        run: docker compose up -d
+      # `--wait` blocks until every service reports healthy (via each
+      # service's HEALTHCHECK)
+      - name: Start Compose stack (wait for healthy)
+        run: docker compose up -d --wait --wait-timeout 90
 
       - name: Show running services
         run: docker compose ps
@@ -81,9 +83,7 @@ jobs:
       # own /health route on host port 80 (see nginx/nginx-docker.conf), not
       # ":8080/service-a/health". Documented in README under CI/CD Pipeline.
       - name: Check gateway health
-        run: |
-          sleep 10
-          curl --fail http://localhost/health
+        run: curl --fail http://localhost/health
 
       - name: Verify full pipeline (POST /telemetry)
         run: |
