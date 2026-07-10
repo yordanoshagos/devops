@@ -38,6 +38,9 @@ fi
 echo "Deploying ${APP_NAME} using image tag: ${IMAGE_TAG}"
 
 docker compose -f docker-compose.prod.yml pull
-docker compose -f docker-compose.prod.yml up -d --remove-orphans
+# `--wait` blocks until every service reports healthy (or times out), so we
+# fail the deploy fast instead of returning success on a stack that isn't
+# actually ready to serve traffic.
+docker compose -f docker-compose.prod.yml up -d --remove-orphans --wait --wait-timeout 90
 docker compose -f docker-compose.prod.yml ps
 
