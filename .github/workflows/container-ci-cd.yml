@@ -132,6 +132,8 @@ jobs:
     strategy:
       matrix:
         include:
+          - service: nginx
+            path: ./nginx
           - service: service-a
             path: ./service-a
           - service: service-b
