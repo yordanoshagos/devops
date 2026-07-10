@@ -68,6 +68,15 @@ jobs:
       - name: Validate Compose file
         run: docker compose config
 
+      # verify-compose exercises the dev file; this catches syntax/interpolation
+      # errors in docker-compose.prod.yml before they reach main.
+      - name: Validate production Compose file
+        run: |
+          DOCKERHUB_USERNAME=ci-check \
+          APP_NAME=devops-satellite-telemetry \
+          IMAGE_TAG=sha-deadbee \
+          docker compose -f docker-compose.prod.yml config
+
       - name: Build Compose stack
         run: docker compose build --pull
 
