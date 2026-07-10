@@ -176,3 +176,5 @@ jobs:
           echo "### Published Image" >> "$GITHUB_STEP_SUMMARY"
           echo "Service: ${{ matrix.service }}" >> "$GITHUB_STEP_SUMMARY"
           echo "Image: ${{ vars.DOCKERHUB_USERNAME }}/${{ github.event.repository.name }}-${{ matrix.service }}:sha-${{ env.SHORT_SHA }}" >> "$GITHUB_STEP_SUMMARY"
+          echo "Commit (short): ${{ env.SHORT_SHA }}" >> "$GITHUB_STEP_SUMMARY"
+          echo "Commit (full): ${{ github.sha }}" >> "$GITHUB_STEP_SUMMARY"
