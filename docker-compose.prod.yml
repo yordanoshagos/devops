@@ -11,6 +11,12 @@
 
 services:
   nginx:
+    # NOTE: deploy.sh runs `docker compose pull` before `up`, so the pulled
+    # public nginx:1.27-alpine wins in the current deploy flow. The build
+    # stanza here is defensive/for-consistency-with-the-dev-file only. A
+    # follow-up should publish a custom nginx image and switch this to
+    # image: <registry>/devops-satellite-telemetry-nginx:<sha>.
+    build: ./nginx
     image: nginx:1.27-alpine
     container_name: nginx
     ports:
